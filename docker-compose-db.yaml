@@ -1,20 +1,21 @@
-version: '3.7'
-
+name: pet-adaption-backend-db
 services:
   db:
+    container_name: mysql_db_container
     image: mysql:latest
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_DATABASE: ${MYSQL_DB}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - ./mysql_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT}:${MYSQL_PORT}"
 
   phpmyadmin:
+    container_name: phpmyadmin_container
     image: phpmyadmin/phpmyadmin:latest
     restart: always
     depends_on:
@@ -23,4 +24,4 @@ services:
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
-      - "8080:80"
+      - "${PHPYMYADMIN_PORT}:80"
