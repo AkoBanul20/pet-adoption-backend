@@ -29,14 +29,33 @@ def get_lost_pets(
     db: Session,
     skip: int = 0,
     limit: int = 10,
+    pet_type: Optional[str] = None,
+    breed: Optional[str] = None,
+    color: Optional[str] = None,
+    size: Optional[str] = None,
+    gender: Optional[str] = None,
+
 ) -> List[LostPet]:
     """
     Get all active lost pet reports with associated pet details.
     """
-    _query = db.query(LostPet)\
+    query = db.query(LostPet)\
+        .join(Pet, LostPet.pet_id == Pet.id)\
         .options(joinedload(LostPet.pet))\
         .filter(LostPet.deleted_at == None)
+    
+    # Apply filters if provided
+    if pet_type:
+        query = query.filter(Pet.type == pet_type)
+    if breed:
+        query = query.filter(Pet.breed == breed)
+    if color:
+        query = query.filter(Pet.color == color)
+    if size:
+        query = query.filter(Pet.size == size)
+    if gender:
+        query = query.filter(Pet.gender == gender)
 
-    query = _query.offset(skip).limit(limit).all()
+    query = query.offset(skip).limit(limit).all()
 
     return query
