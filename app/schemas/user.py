@@ -8,7 +8,6 @@ class UserBase(BaseModel):
     email: EmailStr
     username: str = Field(..., min_length=3, max_length=50)
     full_name: Optional[str] = None
-    is_active: Optional[bool] = True
 
 
 class UserCreate(UserBase):
