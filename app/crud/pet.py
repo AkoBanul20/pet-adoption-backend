@@ -18,13 +18,18 @@ def get_pets(
     gender: Optional[str] = None,
     breed: Optional[str] = None,
     color: Optional[str] = None,
-    # size: Optional[str] = None,
+    size: Optional[str] = None,
+    added_by_admin: Optional[bool] = None,
+
 ) -> List[Pet]:
     """
     Get multiple pets with optional filtering
     """
-    query = db.query(Pet)
-    # print(query)
+    query = db.query(Pet).join(User, Pet.owner_id == User.id)
+
+
+    if added_by_admin:
+        query = query.filter(User.is_superuser == True)
 
     # Apply filters if provided
     if type:
@@ -35,10 +40,9 @@ def get_pets(
         query = query.filter(Pet.breed == breed)
     if color:
         query = query.filter(Pet.color == color)
-    # if size:
-    #     query = query.filter(Pet.size == size)
+    if size:
+        query = query.filter(Pet.size == size)
 
-    # print(query.offset(skip).limit(limit).all())
     return query.offset(skip).limit(limit).all()
 
 
