@@ -37,6 +37,7 @@ def read_pets_route(
     gender: Optional[str] = None,
     breed: Optional[str] = None,
     color: Optional[str] = None,
+    admin_featured: bool = False,
 ) -> Any:
     """
     Retrieve all pets record.
@@ -49,6 +50,7 @@ def read_pets_route(
         gender=gender,
         breed=breed,
         color=color,
+        added_by_admin=admin_featured
     )
 
     return pets
