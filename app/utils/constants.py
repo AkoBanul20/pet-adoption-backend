@@ -11,6 +11,7 @@ ENVIRONMENT= config("ENVIRONMENT", default="dev")
 
 if ENVIRONMENT == "dev":
     DATABASE_URL = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_SERVER}:3306/{MYSQL_DATABASE}"
+    print(DATABASE_URL)
 elif ENVIRONMENT == "prod":
     DATABASE_URL = config("DATABASE_URL")
 
