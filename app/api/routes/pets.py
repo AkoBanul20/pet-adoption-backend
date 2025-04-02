@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.api.deps import get_current_user
-from app.core.config import settings
 from app.crud.pet import create_pet, update_pet, search_pets, get_pets, get_pet
 from app.schemas.pet import Pet, PetCreate
 from app.models.user import User
