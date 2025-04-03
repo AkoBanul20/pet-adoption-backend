@@ -5,7 +5,10 @@ from app.api.routes import pets, lost_pets
 from app.utils.constants import SERVER_NAME, API_V1_STR
 
 app = FastAPI(
-    title=SERVER_NAME, openapi_url=f"{API_V1_STR}/openapi.json"
+    title=SERVER_NAME, 
+    openapi_url="/api/openapi.json",  # Schema will be at /api/openapi.json
+    docs_url="/api/docs",            # Swagger UI at /api/docs
+    redoc_url="/api/redoc", 
 )
 
 # Set all CORS enabled origins
@@ -13,6 +16,9 @@ origins = [
     "http://localhost",
     "http://localhost:8080",
     "http://localhost:3000",
+    "https://qcacac.site",
+    "https://qcacac.site/api"
+
 ]
 
 app.add_middleware(
