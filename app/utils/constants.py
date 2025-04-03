@@ -21,4 +21,4 @@ SECRET_KEY = config("SECRET_KEY")
 
 
 SERVER_NAME: str = "Lost and Found Management System"
-API_V1_STR: str = "/api/v1"
+API_V1_STR: str = "/v1"

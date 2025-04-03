@@ -6,9 +6,9 @@ from app.utils.constants import SERVER_NAME, API_V1_STR
 
 app = FastAPI(
     title=SERVER_NAME, 
-    openapi_url="/api/openapi.json",  # Schema will be at /api/openapi.json
-    docs_url="/api/docs",            # Swagger UI at /api/docs
-    redoc_url="/api/redoc", 
+    openapi_url="/openapi.json",  # Schema will be at /api/openapi.json
+    docs_url="/docs",            # Swagger UI at /api/docs
+    redoc_url="/redoc", 
 )
 
 # Set all CORS enabled origins
