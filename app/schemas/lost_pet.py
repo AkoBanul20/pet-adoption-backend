@@ -7,7 +7,7 @@ from .pet import PetBase, PetInDBBase
 
 
 class LostPetBase(BaseModel):
-    pet_id: int
+    # pet_id: int
     last_seen_location: str
     last_seen_date: datetime
     additional_details: Optional[str] = None
@@ -39,7 +39,7 @@ class LostPetUpdate(BaseModel):
 
 class LostPetInDBBase(LostPetBase):
     id: int
-    pet_id: int
+    pet: PetInDBBase
     deleted_at: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
