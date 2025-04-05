@@ -2,14 +2,14 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import auth
 from app.api.routes import pets, lost_pets
-from app.utils.constants import SERVER_NAME, API_V1_STR
+from app.utils.constants import (SERVER_NAME, API_V1_STR, API_ROOT_PATH,)
 
 app = FastAPI(
     title=SERVER_NAME, 
     openapi_url="/openapi.json",  # Schema will be at /api/openapi.json
     docs_url="/docs",            # Swagger UI at /api/docs
     redoc_url="/redoc",
-    root_path="/api",  # All routes will be prefixed with /api 
+    root_path=API_ROOT_PATH,  # All routes will be prefixed with /api 
 )
 
 # Set all CORS enabled origins
