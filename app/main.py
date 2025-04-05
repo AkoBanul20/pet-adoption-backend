@@ -8,7 +8,8 @@ app = FastAPI(
     title=SERVER_NAME, 
     openapi_url="/openapi.json",  # Schema will be at /api/openapi.json
     docs_url="/docs",            # Swagger UI at /api/docs
-    redoc_url="/redoc", 
+    redoc_url="/redoc",
+    root_path="/api",  # All routes will be prefixed with /api 
 )
 
 # Set all CORS enabled origins
