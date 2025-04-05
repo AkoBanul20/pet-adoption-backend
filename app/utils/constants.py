@@ -22,3 +22,4 @@ SECRET_KEY = config("SECRET_KEY")
 
 SERVER_NAME: str = "Lost and Found Management System"
 API_V1_STR: str = "/v1"
+API_ROOT_PATH= "/api" if ENVIRONMENT == "prod" else "/"
