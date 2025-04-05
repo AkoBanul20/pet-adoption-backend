@@ -10,7 +10,7 @@ config = context.config
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from app.core.config import settings
+from app.utils.constants import DATABASE_URL
 # from app.models.user import User  # Import all models here
 # from app.models.pet import Pet, LostPet
 # from app.models.lost_pet_report import LostPetReport
@@ -18,7 +18,7 @@ from app.models import  *
 from app.core.database import Base
 
 # Set the sqlalchemy.url in alembic config from our app settings
-config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI)
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:

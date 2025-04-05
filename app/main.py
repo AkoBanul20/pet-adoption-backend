@@ -2,10 +2,14 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import auth
 from app.api.routes import pets, lost_pets
-from app.core.config import settings
+from app.utils.constants import (SERVER_NAME, API_V1_STR, API_ROOT_PATH,)
 
 app = FastAPI(
-    title=settings.SERVER_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    title=SERVER_NAME, 
+    openapi_url="/openapi.json",  # Schema will be at /api/openapi.json
+    docs_url="/docs",            # Swagger UI at /api/docs
+    redoc_url="/redoc",
+    root_path=API_ROOT_PATH,  # All routes will be prefixed with /api 
 )
 
 # Set all CORS enabled origins
@@ -13,6 +17,9 @@ origins = [
     "http://localhost",
     "http://localhost:8080",
     "http://localhost:3000",
+    "https://qcacac.site",
+    "https://qcacac.site/api"
+
 ]
 
 app.add_middleware(
@@ -23,9 +30,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Root endpoint
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the API", "status": "active"}
+
+# Health check point
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+
 # Include routers
-app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
-app.include_router(pets.router, prefix=f"{settings.API_V1_STR}/pet", tags=["pets"])
+app.include_router(auth.router, prefix=f"{API_V1_STR}/auth", tags=["auth"])
+app.include_router(pets.router, prefix=f"{API_V1_STR}/pet", tags=["pets"])
 app.include_router(
-    lost_pets.router, prefix=f"{settings.API_V1_STR}/lost-pet", tags=["lost pets"]
+    lost_pets.router, prefix=f"{API_V1_STR}/lost-pet", tags=["lost pets"]
 )
