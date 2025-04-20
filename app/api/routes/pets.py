@@ -6,8 +6,15 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.api.deps import get_current_user
-from app.crud.pet import create_pet, update_pet, search_pets, get_pets, get_pet
-from app.schemas.pet import Pet, PetCreate
+from app.crud.pet import (
+    create_pet,
+    update_pet,
+    search_pets,
+    get_pets,
+    get_pet,
+    get_pets_by_owner,
+)
+from app.schemas.pet import Pet, PetCreate, PetsByOwner
 from app.models.user import User
 
 router = APIRouter()
@@ -49,7 +56,7 @@ def read_pets_route(
         gender=gender,
         breed=breed,
         color=color,
-        added_by_admin=admin_featured
+        added_by_admin=admin_featured,
     )
 
     return pets
@@ -101,3 +108,20 @@ def search_pets_route(
     )
 
     return search_pets_result
+
+
+@router.get("/list/mine", response_model=List[PetsByOwner])
+def read_pets_by_owner_route(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    """Get list of pet by Owner"""
+
+    # print(current_user, "from routes")
+
+    pets_by_owner = get_pets_by_owner(
+        db=db,
+        current_user=current_user,
+    )
+
+    return pets_by_owner
