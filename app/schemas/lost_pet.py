@@ -14,7 +14,7 @@ class LostPetBase(BaseModel):
 
 
 class LostPetCreate(LostPetBase):
-    status: LostPetStatus = LostPetStatus.REPORTED
+    pet_id: int
 
     @validator("last_seen_location")
     def last_seen_location_not_empty(cls, v: str):
@@ -40,6 +40,7 @@ class LostPetUpdate(BaseModel):
 class LostPetInDBBase(LostPetBase):
     id: int
     pet: PetInDBBase
+    status: LostPetStatus = LostPetStatus.REPORTED
     deleted_at: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
@@ -62,9 +63,9 @@ class LostPetDetailsResponse(BaseModel):
     last_seen_date: datetime
     additional_details: Optional[str] = None
     status: str
-    created_at: datetime
-    updated_at: datetime
-    deleted_at: Optional[datetime] = None
+    # created_at: datetime
+    # updated_at: datetime
+    # deleted_at: Optional[datetime] = None
     pet: PetInDBBase
 
     class Config:
