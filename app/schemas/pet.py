@@ -14,6 +14,7 @@ class PetBase(BaseModel):
     color: str
     size: str
     description: str
+    gender: str
     # owner_id: Optional[int] = None 
     # is_deleted: Optional[bool] = False
 
@@ -66,9 +67,9 @@ class PetUpdate(BaseModel):
 class PetInDBBase(PetBase):
     id: int
     owner: UserDetailsResponse
-    is_deleted: Optional[bool] = False
-    created_at: datetime
-    updated_at: Optional[datetime] = None
+    # is_deleted: Optional[bool] = False
+    # created_at: datetime
+    # updated_at: Optional[datetime] = None
 
     class Config:
         # orm_mode = True
@@ -81,3 +82,11 @@ class Pet(PetInDBBase):
 
 class PetInDB(PetInDBBase):
     pass
+
+
+class PetsByOwner(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
