@@ -20,13 +20,11 @@ def get_pets(
     color: Optional[str] = None,
     size: Optional[str] = None,
     added_by_admin: Optional[bool] = None,
-
 ) -> List[Pet]:
     """
     Get multiple pets with optional filtering
     """
     query = db.query(Pet).join(User, Pet.owner_id == User.id)
-
 
     if added_by_admin:
         query = query.filter(User.is_superuser == True)
@@ -129,3 +127,11 @@ def search_pets(
         .limit(limit)
         .all()
     )
+
+
+def get_pets_by_owner(db: Session, current_user: User) -> List[Pet]:
+    """Get list of pets by Owner/User"""
+    print(current_user, "this is from current user")
+    query = db.query(Pet).filter(Pet.owner_id == int(current_user.id))
+
+    return query.all()
