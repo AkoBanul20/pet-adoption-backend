@@ -84,7 +84,7 @@ class PetInDB(PetInDBBase):
     pass
 
 
-class PetsByOwner(BaseModel):
+class PetsByOwner(PetBase):
     id: int
     name: str
 
