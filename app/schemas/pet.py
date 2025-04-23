@@ -15,6 +15,7 @@ class PetBase(BaseModel):
     size: str
     description: str
     gender: str
+    image_url: Optional[str] = None
     # owner_id: Optional[int] = None 
     # is_deleted: Optional[bool] = False
 
@@ -62,6 +63,7 @@ class PetUpdate(BaseModel):
     color: Optional[str] = None
     size: Optional[str] = None
     description: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 class PetInDBBase(PetBase):

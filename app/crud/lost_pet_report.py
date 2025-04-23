@@ -17,6 +17,8 @@ def create_lost_pet_report(db: Session, lost_pet_report_in: LostPetReportCreate)
         reporter_id=lost_pet_report_in.reporter_id,
         details=lost_pet_report_in.details,
         report_location=lost_pet_report_in.report_location,
+        image_url=lost_pet_report_in.image_url,
+        
     )
 
     db.add(db_lost_pet_report)
