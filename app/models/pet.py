@@ -31,6 +31,7 @@ class Pet(Base):
     color = Column(String(100), nullable=False)
     size = Column(String(100), nullable=False)
     description = Column(Text, nullable=False)
+    image_url = Column(String(255), nullable=True, default=None) # for image upload
     # is_deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True, onupdate=func.now())
     created_at = Column(DateTime, server_default=func.now())
