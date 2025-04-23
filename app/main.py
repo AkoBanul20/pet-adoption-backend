@@ -1,5 +1,7 @@
+import os
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.api.routes import auth
 from app.api.routes import pets, lost_pets, lost_pet_report
 from app.utils.constants import (SERVER_NAME, API_V1_STR, API_ROOT_PATH,)
@@ -29,6 +31,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+os.makedirs("app/static/uploads", exist_ok=True)
+# Mount 'app/static' to serve at '/static'
+static_path = os.path.join(os.path.dirname(__file__), "static")
+app.mount("/static", StaticFiles(directory=static_path, html=True), name="static")
 
 # Root endpoint
 @app.get("/")

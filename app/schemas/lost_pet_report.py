@@ -11,6 +11,7 @@ class LostPetReportBase(BaseModel):
     reporter_id: int
     details: str
     report_location: str
+    image_url: Optional[str] = None
 
 
 class LostPetReportCreate(LostPetReportBase):
@@ -30,6 +31,7 @@ class LostPetReportCreate(LostPetReportBase):
 class LostPetReportUpdate(BaseModel):
     details: Optional[str] = None
     report_location: Optional[str] = None
+    image_url: Optional[str] =  None
 
     @validator("details")
     def details_not_empty(cls, v: str):
@@ -73,6 +75,7 @@ class LostPetReportDetailsResponse(BaseModel):
     reporter: ReporterBasicInfo
     report_location: str
     report_date: datetime
+    image_url: str
     created_at: datetime
     updated_at: datetime
     deleted_at: Optional[datetime] = None

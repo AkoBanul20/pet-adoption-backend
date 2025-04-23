@@ -176,3 +176,4 @@ cython_debug/
 mysql_data/
 env_files/
 redis_data/
+static/

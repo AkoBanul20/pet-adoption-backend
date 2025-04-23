@@ -61,6 +61,7 @@ def create_pet(
         size=pet_in.size,
         description=pet_in.description,
         owner_id=current_user.id,
+        image_url=pet_in.image_url,
     )
     db.add(db_pet)
     db.commit()
@@ -131,7 +132,6 @@ def search_pets(
 
 def get_pets_by_owner(db: Session, current_user: User) -> List[Pet]:
     """Get list of pets by Owner/User"""
-    print(current_user, "this is from current user")
     query = db.query(Pet).filter(Pet.owner_id == int(current_user.id))
 
     return query.all()
