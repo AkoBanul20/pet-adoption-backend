@@ -21,6 +21,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
+# Ensure the uploads directory exists
+RUN mkdir -p app/static/uploads/pets app/static/uploads/lost_pet_reports
+
 
 # Run the application
 CMD /bin/bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
