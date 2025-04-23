@@ -1,7 +1,21 @@
+import os
+import shutil
 from datetime import datetime
 from typing import Any, List, Optional
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from typing_extensions import Annotated
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    HTTPException,
+    status,
+    File,
+    UploadFile,
+    Form,
+)
 from sqlalchemy.orm import Session
+from pathlib import Path
+from uuid import uuid4
 
 
 from app.core.database import get_db
@@ -19,18 +33,87 @@ from app.models.user import User
 
 router = APIRouter()
 
+UPLOAD_DIR = Path("app/static/uploads/pets")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+STATIC_URL_BASE = "/static/uploads/pets"
+
 
 @router.post("/add", response_model=Pet, status_code=status.HTTP_201_CREATED)
 def create_pet_route(
     *,
     db: Session = Depends(get_db),
-    pet_in: PetCreate,
+    type: str = Form(...),
+    name: Optional[str] = Form(None),
+    breed: Optional[str] = Form(None),
+    gender: Optional[str] = Form(None),
+    age: Optional[str] = Form(None),
+    color: str = Form(...),
+    size: str = Form(...),
+    description: str = Form(...),
+    image_file: Annotated[UploadFile, File()],
     current_user: User = Depends(get_current_user),
 ) -> Any:
     """
     Create new pet record
     """
-    created_pet = create_pet(db=db, pet_in=pet_in, current_user=current_user)
+
+    image_url = None
+
+    # handle image upload if a file is provided
+    if image_file and image_file.filename:
+        try:
+            # Validate file type
+            if image_file.content_type not in ["image/jpeg", "image/png", "image/jpg"]:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid File Type. Only JPEG and PNG are allowed.",
+                )
+            
+            # USER DIRECTORY
+            user_id = current_user.id
+            username = current_user.username
+            USER_FOLDER = f"{str(user_id)}/{str(username)}"
+            USER_DIR = UPLOAD_DIR / str(user_id) / str(username)
+            USER_DIR.mkdir(parents=True, exist_ok=True)
+
+
+            # Create a unique filename to prevent overwriting
+            file_extension =  os.path.splitext(image_file.filename)[1]
+            filename = f"{uuid4()}{file_extension}"
+
+            # Save the file
+            file_path = USER_DIR / filename
+            with file_path.open("wb") as buffer:
+                shutil.copyfileobj(image_file.file, buffer)
+
+            # Generate a URL that can be accessed via your API
+            image_url = f"{STATIC_URL_BASE}/{USER_FOLDER}/{filename}"
+
+        except Exception as e:
+            # Handle unexpected errors
+            raise HTTPException(
+                status_code=500, detail=f"Error uploading image: {str(e)}"
+            )
+
+    # pet_in.image_url = image_url
+    pet_data = {
+        "type": type,
+        "name": name,
+        "breed": breed,
+        "gender": gender,
+        "age": age,
+        "color": color,
+        "size": size,
+        "description": description,
+        "image_url": image_url,
+    }
+
+    created_pet = create_pet(
+        db=db,
+        pet_in=PetCreate(**pet_data),
+        current_user=current_user,
+    )
     return created_pet
 
 
