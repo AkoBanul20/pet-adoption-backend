@@ -1,4 +1,6 @@
 import os
+import json
+import logging
 from pathlib import Path
 from uuid import uuid4
 import shutil
@@ -22,6 +24,9 @@ from app.schemas.lost_pet_report import (
 
 from app.models.user import User
 
+# from app.tasks.lost_pet_report import send_lost_pet_report_to_redis
+from app.utils.redis import RedisHelper
+
 router = APIRouter()
 
 
@@ -29,6 +34,8 @@ UPLOAD_DIR = Path("app/static/uploads/lost_pet_reports")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 STATIC_URL_BASE = "/static/uploads/lost_pet_reports"
+
+redis = RedisHelper()
 
 
 @router.post("/add", response_model=LostPetReport, status_code=status.HTTP_201_CREATED)
@@ -92,6 +99,30 @@ def create_lost_pet_report_route(
         db=db,
         lost_pet_report_in=LostPetReportCreate(**lost_pet_report_data),
     )
+
+    # data for redis queue
+
+    redis_data = {
+        "report_id": created_lost_pet_report.id,
+        "pet_image_url": created_lost_pet_report.lost_pet.pet.image_url,
+        "report_image_url": created_lost_pet_report.image_url,
+        "reporter_details": {
+            "id": created_lost_pet_report.reporter.id,
+            "username": created_lost_pet_report.reporter.username,
+            "email": created_lost_pet_report.reporter.email,
+        },
+        "owner_details": {
+            "id": created_lost_pet_report.lost_pet.pet.owner.id,
+            "username": created_lost_pet_report.lost_pet.pet.owner.username,
+            "email": created_lost_pet_report.lost_pet.pet.owner.email,
+        },
+    }
+
+    success_queue = redis.add_to_redis_set("qc_pet_adoption:lost_pet_reports", json.dumps(redis_data))
+    
+    if not success_queue:
+        logging.warning(f"Failed to store report {created_lost_pet_report.id} in Redis")
+        pass
 
     return created_lost_pet_report
 
