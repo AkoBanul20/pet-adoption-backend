@@ -34,7 +34,7 @@ class UserUpdate(BaseModel):
 
 class UserInDBBase(UserBase):
     id: int
-    # is_superuser: bool
+    is_superuser: bool
     # created_at: Optional[datetime] = None
     # updated_at: Optional[datetime] = None
 
