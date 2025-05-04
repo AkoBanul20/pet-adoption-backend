@@ -92,3 +92,7 @@ class PetsByOwner(PetBase):
 
     class Config:
         from_attributes = True
+
+class PetListResponse(BaseModel):
+    items: List[Pet]
+    total: int
