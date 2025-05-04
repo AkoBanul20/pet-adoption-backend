@@ -95,6 +95,8 @@ class AdoptionPet(Base):
     pet_id = Column(
         Integer, ForeignKey("pets.id", ondelete="CASCADE"), nullable=False, index=True
     )
+    adopter_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True,)
+    adoption_date = Column(DateTime, nullable=False, default=datetime.utcnow)
     found_in = Column(String(255), nullable=False)
     is_vaccinated = Column(Boolean, default=True, index=True)
     is_neutered = Column(Boolean, default=True, index=True)
@@ -106,6 +108,9 @@ class AdoptionPet(Base):
         nullable=False,
         index=True,
     )  # available, adopted, etc.
+
+    approved_by = Column(Integer, ForeignKey('users.id'))  # admin user ID
+    agreement_signed = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now(), index=True)
     updated_at = Column(
         DateTime, server_default=func.now(), onupdate=func.now(), index=True
@@ -119,6 +124,8 @@ class AdoptionPet(Base):
         cascade="all, delete-orphan",
         lazy="dynamic"  # Enables querying directly on relationship
     )
+    adopter = relationship('User', foreign_keys=[adopter_id])
+    approved_admin = relationship('User', foreign_keys=[approved_by])
 
     # Hybrid property for view count
     @hybrid_property
