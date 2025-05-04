@@ -1,4 +1,5 @@
 import enum
+from datetime import datetime
 
 from sqlalchemy import (
     Column,
@@ -10,8 +11,11 @@ from sqlalchemy import (
     Enum,
     ForeignKey,
     JSON,
+    Boolean,
+    select,
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from app.core.database import Base
 
 
@@ -92,6 +96,8 @@ class AdoptionPet(Base):
         Integer, ForeignKey("pets.id", ondelete="CASCADE"), nullable=False, index=True
     )
     found_in = Column(String(255), nullable=False)
+    is_vaccinated = Column(Boolean, default=True, index=True)
+    is_neutered = Column(Boolean, default=True, index=True)
     additional_details = Column(Text, nullable=True)
     media = Column(JSON, nullable=True)
     status = Column(
@@ -107,3 +113,42 @@ class AdoptionPet(Base):
     deleted_at = Column(DateTime, nullable=True, index=True)
 
     pet = relationship("Pet", back_populates="adoption_pet")
+    views = relationship(
+        "AdoptionPetViews", 
+        back_populates="adoption_pet",
+        cascade="all, delete-orphan",
+        lazy="dynamic"  # Enables querying directly on relationship
+    )
+
+    # Hybrid property for view count
+    @hybrid_property
+    def view_count(self):
+        return self.views.count()
+
+    @view_count.expression
+    def view_count(cls):
+        return (
+            select([func.count(AdoptionPetViews.id)])
+            .where(AdoptionPetViews.adoption_pet_id == cls.id)
+            .label("view_count")
+        )
+
+
+class AdoptionPetViews(Base):
+    __tablename__ = "adoption_pet_views"
+
+    id = Column(Integer, primary_key=True, index=True)
+    adoption_pet_id = Column(Integer, ForeignKey('adoption_pets.id'), nullable=False)
+    viewed_at = Column(DateTime, default=datetime.utcnow, index=True)
+    others =  Column(String(255), nullable=True, index=True)
+    created_at = Column(DateTime, server_default=func.now(), index=True)
+    updated_at = Column(
+        DateTime, server_default=func.now(), onupdate=func.now(), index=True
+    )
+    deleted_at = Column(DateTime, nullable=True, index=True)
+
+    adoption_pet = relationship(
+        "AdoptionPet", 
+        back_populates="views",
+        lazy="joined"  # Optional: automatic join when querying views
+    )
