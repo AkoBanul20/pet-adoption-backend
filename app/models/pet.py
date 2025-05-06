@@ -37,6 +37,7 @@ class Pet(Base):
     size = Column(String(100), nullable=False)
     description = Column(Text, nullable=False)
     image_url = Column(String(255), nullable=True, default=None)  # for image upload
+    is_for_adoption = Column(Boolean, nullable=True, index=True, default=True)
     # is_deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True, onupdate=func.now())
     created_at = Column(DateTime, server_default=func.now())
