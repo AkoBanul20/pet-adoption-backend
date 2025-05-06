@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.api.routes import auth
-from app.api.routes import pets, lost_pets, lost_pet_report
+from app.api.routes import pets, lost_pets, lost_pet_report, adoption_pet, adoptions
 from app.utils.constants import (SERVER_NAME, API_V1_STR, API_ROOT_PATH,)
 
 app = FastAPI(
@@ -55,3 +55,5 @@ app.include_router(
     lost_pets.router, prefix=f"{API_V1_STR}/lost-pet", tags=["lost pets"]
 )
 app.include_router(lost_pet_report.router, prefix=f"{API_V1_STR}/lost-pet-report", tags=["lost pet report"])
+app.include_router(adoption_pet.router, prefix=f"{API_V1_STR}/adoption-pet", tags=["pet for adoption"])
+app.include_router(adoptions.router, prefix=f"{API_V1_STR}/adoption", tags=["adoption"])

@@ -34,7 +34,14 @@ class UserUpdate(BaseModel):
 
 class UserInDBBase(UserBase):
     id: int
-    # is_superuser: bool
+    contact: Optional[str]
+    home_street: Optional[str]
+    city: Optional[str]
+    region: Optional[str]
+    postal_code: Optional[str]
+    country: Optional[str]
+
+    is_superuser: bool
     # created_at: Optional[datetime] = None
     # updated_at: Optional[datetime] = None
 
