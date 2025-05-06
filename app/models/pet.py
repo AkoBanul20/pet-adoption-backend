@@ -95,8 +95,6 @@ class AdoptionPet(Base):
     pet_id = Column(
         Integer, ForeignKey("pets.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    adopter_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True,)
-    adoption_date = Column(DateTime, nullable=False, default=datetime.utcnow)
     found_in = Column(String(255), nullable=False)
     is_vaccinated = Column(Boolean, default=True, index=True)
     is_neutered = Column(Boolean, default=True, index=True)
@@ -109,8 +107,6 @@ class AdoptionPet(Base):
         index=True,
     )  # available, adopted, etc.
 
-    approved_by = Column(Integer, ForeignKey('users.id'))  # admin user ID
-    agreement_signed = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now(), index=True)
     updated_at = Column(
         DateTime, server_default=func.now(), onupdate=func.now(), index=True
@@ -118,14 +114,15 @@ class AdoptionPet(Base):
     deleted_at = Column(DateTime, nullable=True, index=True)
 
     pet = relationship("Pet", back_populates="adoption_pet")
+    
+    # Add this relationship to link AdoptionPet to Adoption
+    adoptions = relationship("Adoption", back_populates="adoption_pet", cascade="all, delete-orphan")
     views = relationship(
-        "AdoptionPetViews", 
+        "AdoptionPetViews",
         back_populates="adoption_pet",
         cascade="all, delete-orphan",
-        lazy="dynamic"  # Enables querying directly on relationship
+        lazy="dynamic",  # Enables querying directly on relationship
     )
-    adopter = relationship('User', foreign_keys=[adopter_id])
-    approved_admin = relationship('User', foreign_keys=[approved_by])
 
     # Hybrid property for view count
     @hybrid_property
@@ -145,9 +142,9 @@ class AdoptionPetViews(Base):
     __tablename__ = "adoption_pet_views"
 
     id = Column(Integer, primary_key=True, index=True)
-    adoption_pet_id = Column(Integer, ForeignKey('adoption_pets.id'), nullable=False)
+    adoption_pet_id = Column(Integer, ForeignKey("adoption_pets.id"), nullable=False)
     viewed_at = Column(DateTime, default=datetime.utcnow, index=True)
-    others =  Column(String(255), nullable=True, index=True)
+    others = Column(String(255), nullable=True, index=True)
     created_at = Column(DateTime, server_default=func.now(), index=True)
     updated_at = Column(
         DateTime, server_default=func.now(), onupdate=func.now(), index=True
@@ -155,7 +152,7 @@ class AdoptionPetViews(Base):
     deleted_at = Column(DateTime, nullable=True, index=True)
 
     adoption_pet = relationship(
-        "AdoptionPet", 
+        "AdoptionPet",
         back_populates="views",
-        lazy="joined"  # Optional: automatic join when querying views
+        lazy="joined",  # Optional: automatic join when querying views
     )
