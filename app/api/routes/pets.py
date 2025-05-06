@@ -27,8 +27,9 @@ from app.crud.pet import (
     get_pets,
     get_pet,
     get_pets_by_owner,
+    get_pets_count,
 )
-from app.schemas.pet import Pet, PetCreate, PetsByOwner
+from app.schemas.pet import Pet, PetCreate, PetsByOwner, PetListResponse
 from app.models.user import User
 
 router = APIRouter()
@@ -69,7 +70,7 @@ def create_pet_route(
                     status_code=400,
                     detail="Invalid File Type. Only JPEG and PNG are allowed.",
                 )
-            
+
             # USER DIRECTORY
             user_id = current_user.id
             username = current_user.username
@@ -77,9 +78,8 @@ def create_pet_route(
             USER_DIR = UPLOAD_DIR / str(user_id) / str(username)
             USER_DIR.mkdir(parents=True, exist_ok=True)
 
-
             # Create a unique filename to prevent overwriting
-            file_extension =  os.path.splitext(image_file.filename)[1]
+            file_extension = os.path.splitext(image_file.filename)[1]
             filename = f"{uuid4()}{file_extension}"
 
             # Save the file
@@ -117,7 +117,7 @@ def create_pet_route(
     return created_pet
 
 
-@router.get("/list", response_model=List[Pet])
+@router.get("/list", response_model=PetListResponse)
 def read_pets_route(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -142,7 +142,22 @@ def read_pets_route(
         added_by_admin=admin_featured,
     )
 
-    return pets
+    # Get the total count of pets ()
+    total = get_pets_count(
+        db,
+        skip=skip,
+        limit=limit,
+        type=type,
+        gender=gender,
+        breed=breed,
+        color=color,
+        added_by_admin=admin_featured,
+    )
+
+    return {
+        "items": pets,
+        "total": total,
+    }
 
 
 @router.get("/{pet_id}", response_model=Pet)

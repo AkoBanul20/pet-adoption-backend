@@ -135,3 +135,32 @@ def get_pets_by_owner(db: Session, current_user: User) -> List[Pet]:
     query = db.query(Pet).filter(Pet.owner_id == int(current_user.id))
 
     return query.all()
+
+
+def get_pets_count(
+        db: Session,
+        skip: int= 0,
+        limit: int = 10,
+        type=None,
+        gender=None,
+        breed=None,
+        color=None,
+        added_by_admin=False,
+) -> int:
+    """Get the total numbe of pets in database"""
+
+    query = db.query(Pet).join(User, Pet.owner_id == User.id)
+
+    if added_by_admin:
+        query = query.filter(User.is_superuser == True)
+
+    if type:
+        query = query.filter(Pet.type == type)
+    if gender:
+        query = query.filter(Pet.gender == gender)
+    if breed:
+        query = query.filter(Pet.breed == breed)
+    if color:
+        query = query.filter(Pet.color == color)
+    
+    return query.offset(skip).limit(limit).count()
