@@ -31,6 +31,7 @@ def read_lost_pets_route(
     db: Session = Depends(get_db),
     skip=0, 
     limit=0,
+    status: Optional[str] = None,
     pet_type: Optional[str] = None,
     breed: Optional[str] = None,
     color: Optional[str] = None,
@@ -47,6 +48,7 @@ def read_lost_pets_route(
             breed=breed, 
             color=color, 
             size=size, 
-            gender=gender)
+            gender=gender,
+            status=status,)
 
     return lost_pets
