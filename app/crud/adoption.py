@@ -147,3 +147,30 @@ def update_adoption_request_status(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Database error: {str(e)}",
         )
+    
+
+def get_adoption_data(
+    db: Session,
+    adoption_id: int,
+):
+    try:
+        query = db.query(Adoption).filter(Adoption.id == adoption_id).first()
+        
+        if not query:
+            return {}
+        return AdoptionInDB.model_validate(query)
+
+    except IntegrityError as e:
+        # Roll back the transaction in case of constraint violations
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Database integrity error: {str(e)}",
+        )
+    except SQLAlchemyError as e:
+        # Roll back the transaction in case of any other database errors
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database error: {str(e)}",
+        )

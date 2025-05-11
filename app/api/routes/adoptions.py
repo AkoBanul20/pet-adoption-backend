@@ -1,8 +1,13 @@
+import os
 import json
 import logging
+from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from fastapi.responses import FileResponse
+from docxtpl import DocxTemplate
+import tempfile
 
 from app.core.database import get_db
 from app.api.deps import get_current_user
@@ -12,12 +17,14 @@ from app.schemas.adoption import (
     AdoptionUpdateStatus,
     AdoptionStatus,
     AdoptionRead,
+    AdoptionDocumentGeneration,
 )
 
 from app.crud.adoption import (
     get_adoption_list,
     create_adoption_request,
     update_adoption_request_status,
+    get_adoption_data,
 )
 from app.models.user import User
 from app.utils.redis import RedisHelper
@@ -79,3 +86,61 @@ def update_adoption_request_status_route(
             logging.warning(f"Failed to store in the queue {update_adoption_request.id} in redis")
 
     return update_adoption_request_status(db=db,adoption_id=adoption_id, adoption_status_in=status_update)
+
+# generate document contract
+@router.post("/generate-document/", status_code=status.HTTP_201_CREATED)
+def generate_contract_document(
+    adoption_id: AdoptionDocumentGeneration,
+    db: Session = Depends(get_db)
+):
+    """
+    Generate document contract.
+    """
+    adoption_details = get_adoption_data(db=db, adoption_id=adoption_id.adoption_id)
+
+    if not adoption_details:
+        raise HTTPException(status_code=404, detail="Adoption details is not found")
+    
+    # data to pass in the document
+    context = {
+        "pet_breed": adoption_details.adoption_pet.pet.breed,
+        "pet_color": adoption_details.adoption_pet.pet.color,
+        "pet_gender": adoption_details.adoption_pet.pet.gender,
+        "pet_type": adoption_details.adoption_pet.pet.type,
+        "pet_name": adoption_details.adoption_pet.pet.name,
+        "adopter": adoption_details.adopter.full_name,
+        "contact_no": adoption_details.adopter.contact,
+        "address": f"{adoption_details.adopter.home_street} {adoption_details.adopter.city}",
+        "date": f"{datetime.now().strftime('%B, %d %Y')}"
+    }
+
+    template_path = "app/templates/Adoption_Contract_Template.docx" 
+
+    try:
+        doc = DocxTemplate(template_path)
+
+        doc.render(context)
+
+        # Create a temporary file to store the output
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
+            temp_path = tmp.name
+            doc.save(temp_path)
+
+        # Return the file as a download
+        filename = f"{context['adopter'].replace(' ', '_')}_adoption_contract_document.docx"
+        return FileResponse(
+            path=temp_path, 
+            filename=filename,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+        
+    except BaseException as e:
+        logging.error(f"Error in generating document")
+        # Clean up temporary file if it exists
+        if 'temp_path' in locals():
+            os.unlink(temp_path)
+        raise HTTPException(status_code=500, detail=f"Document generation failed: {str(e)}")
+    
+
+    # return adoption_details

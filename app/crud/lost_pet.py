@@ -29,6 +29,7 @@ def get_lost_pets(
     db: Session,
     skip: int = 0,
     limit: int = 10,
+    status: Optional[str] = None,
     pet_type: Optional[str] = None,
     breed: Optional[str] = None,
     color: Optional[str] = None,
@@ -55,6 +56,8 @@ def get_lost_pets(
         query = query.filter(Pet.size == size)
     if gender:
         query = query.filter(Pet.gender == gender)
+    if status:
+        query = query.filter(LostPet.status == status)
 
     query = query.offset(skip).limit(limit).all()
 
