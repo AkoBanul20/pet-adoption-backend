@@ -59,3 +59,6 @@ class AdoptionInDB(AdoptionInDBBase):
 class AdoptionListResponse(BaseModel):
     items: List[AdoptionRead]
     total: int
+
+class AdoptionDocumentGeneration(BaseModel):
+    adoption_id: int
