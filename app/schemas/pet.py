@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, Field, validator
 
-from app.models.pet import PetGender
+from app.models.pet import PetGender, PurposePet
 from .user import UserInDBBase
 
 
@@ -16,6 +16,7 @@ class PetBase(BaseModel):
     description: str
     gender: str
     image_url: Optional[str] = None
+    purpose: Optional[str] = PurposePet.LOST_PET
     # owner_id: Optional[int] = None 
     # is_deleted: Optional[bool] = False
 

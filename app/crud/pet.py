@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.pet import Pet
 from app.models.user import User
 from app.schemas.pet import PetCreate, PetUpdate
+from app.models.pet import PurposePet 
 
 
 def get_pet(db: Session, pet_id: int) -> Optional[Pet]:
@@ -20,6 +21,8 @@ def get_pets(
     color: Optional[str] = None,
     size: Optional[str] = None,
     added_by_admin: Optional[bool] = None,
+    is_for_adoption: Optional[bool] = None,
+    purpose: Optional[str] =  None,
 ) -> List[Pet]:
     """
     Get multiple pets with optional filtering
@@ -28,6 +31,12 @@ def get_pets(
 
     if added_by_admin:
         query = query.filter(User.is_superuser == True)
+
+    if is_for_adoption:
+        query = query.filter(Pet.is_for_adoption == True)
+
+    if purpose:
+        query = query.filter(Pet.purpose == purpose)
 
     # Apply filters if provided
     if type:
@@ -51,6 +60,10 @@ def create_pet(
 ) -> Pet:
     """Create a new pet entry"""
 
+    valid_purposes = ["ADOPTION", "LOST_PET", "VACCINATION"]
+    # pet_purpose = pet_in.purpose if pet_in.purpose in valid_purposes else "LOST_PET"
+    pet_purpose = PurposePet(pet_in.purpose) if pet_in.purpose in valid_purposes else  PurposePet.LOST_PET
+
     db_pet = Pet(
         type=pet_in.type,
         name=pet_in.name,
@@ -62,6 +75,8 @@ def create_pet(
         description=pet_in.description,
         owner_id=current_user.id,
         image_url=pet_in.image_url,
+        purpose=pet_purpose,
+        is_for_adoption=bool(pet_purpose == PurposePet.ADOPTION)
     )
     db.add(db_pet)
     db.commit()
@@ -146,6 +161,8 @@ def get_pets_count(
         breed=None,
         color=None,
         added_by_admin=False,
+        is_for_adoption=False,
+        purpose = None,
 ) -> int:
     """Get the total numbe of pets in database"""
 
@@ -153,6 +170,14 @@ def get_pets_count(
 
     if added_by_admin:
         query = query.filter(User.is_superuser == True)
+
+    if is_for_adoption:
+        query = query.filter(Pet.is_for_adoption == True)
+
+    if purpose:
+        query = query.filter(Pet.purpose == purpose)
+
+
 
     if type:
         query = query.filter(Pet.type == type)
