@@ -26,6 +26,7 @@ class PetGender(str, enum.Enum):
 class PurposePet(str,enum.Enum):
     ADOPTION = "ADOPTION"
     LOST_PET = "LOST_PET"
+    VACCINATION = "VACCINATION"
 
 class Pet(Base):
     __tablename__ = "pets"
@@ -65,6 +66,12 @@ class Pet(Base):
     # New relationship for adoption pets
     adoption_pet = relationship(
         "AdoptionPet", back_populates="pet", uselist=False, cascade="all, delete-orphan"
+    )
+
+    vaccination_records = relationship(
+        "VaccinationRecord",
+        back_populates="pet",
+        cascade="all, delete-orphan"
     )
 
 

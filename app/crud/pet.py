@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.pet import Pet
 from app.models.user import User
 from app.schemas.pet import PetCreate, PetUpdate
+from app.models.pet import PurposePet 
 
 
 def get_pet(db: Session, pet_id: int) -> Optional[Pet]:
@@ -59,6 +60,10 @@ def create_pet(
 ) -> Pet:
     """Create a new pet entry"""
 
+    valid_purposes = ["ADOPTION", "LOST_PET", "VACCINATION"]
+    # pet_purpose = pet_in.purpose if pet_in.purpose in valid_purposes else "LOST_PET"
+    pet_purpose = PurposePet(pet_in.purpose) if pet_in.purpose in valid_purposes else  PurposePet.LOST_PET
+
     db_pet = Pet(
         type=pet_in.type,
         name=pet_in.name,
@@ -70,8 +75,8 @@ def create_pet(
         description=pet_in.description,
         owner_id=current_user.id,
         image_url=pet_in.image_url,
-        purpose=pet_in.purpose if pet_in.purpose == "ADOPTION" and pet_in.purpose else "LOST_PET",
-        is_for_adoption = True if pet_in.purpose == "ADOPTION" and pet_in.purpose else False,
+        purpose=pet_purpose,
+        is_for_adoption=bool(pet_purpose == PurposePet.ADOPTION)
     )
     db.add(db_pet)
     db.commit()
