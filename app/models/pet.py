@@ -23,6 +23,9 @@ class PetGender(str, enum.Enum):
     MALE = "MALE"
     FEMALE = "FEMALE"
 
+class PurposePet(str,enum.Enum):
+    ADOPTION = "ADOPTION"
+    LOST_PET = "LOST_PET"
 
 class Pet(Base):
     __tablename__ = "pets"
@@ -37,7 +40,9 @@ class Pet(Base):
     size = Column(String(100), nullable=False)
     description = Column(Text, nullable=False)
     image_url = Column(String(255), nullable=True, default=None)  # for image upload
-    is_for_adoption = Column(Boolean, nullable=True, index=True, default=True)
+    is_for_adoption = Column(Boolean, nullable=True, index=True, default=False)
+    purpose = Column(Enum(PurposePet), default=PurposePet.LOST_PET, index=True)
+    # is_for_lostpet = Column(Boolean, nullable=True, index=True, default=False)
     # is_deleted = Column(Boolean, default=False)
     deleted_at = Column(DateTime, nullable=True, onupdate=func.now())
     created_at = Column(DateTime, server_default=func.now())

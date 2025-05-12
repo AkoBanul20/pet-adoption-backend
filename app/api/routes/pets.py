@@ -31,6 +31,7 @@ from app.crud.pet import (
 )
 from app.schemas.pet import Pet, PetCreate, PetsByOwner, PetListResponse
 from app.models.user import User
+from app.models.pet import PurposePet
 
 router = APIRouter()
 
@@ -51,6 +52,7 @@ def create_pet_route(
     age: Optional[str] = Form(None),
     color: str = Form(...),
     size: str = Form(...),
+    purpose: Optional[PurposePet] = Form(PurposePet.LOST_PET),
     description: str = Form(...),
     image_file: Annotated[UploadFile, File()],
     current_user: User = Depends(get_current_user),
@@ -107,6 +109,7 @@ def create_pet_route(
         "size": size,
         "description": description,
         "image_url": image_url,
+        "purpose": purpose,
     }
 
     created_pet = create_pet(
@@ -127,6 +130,8 @@ def read_pets_route(
     breed: Optional[str] = None,
     color: Optional[str] = None,
     admin_featured: bool = False,
+    is_for_adoption: bool  = False,
+    purpose: PurposePet = PurposePet.LOST_PET,
 ) -> Any:
     """
     Retrieve all pets record.
@@ -140,6 +145,8 @@ def read_pets_route(
         breed=breed,
         color=color,
         added_by_admin=admin_featured,
+        is_for_adoption=is_for_adoption,
+        purpose=purpose,
     )
 
     # Get the total count of pets ()
@@ -152,6 +159,8 @@ def read_pets_route(
         breed=breed,
         color=color,
         added_by_admin=admin_featured,
+        is_for_adoption=is_for_adoption,
+        purpose=purpose,
     )
 
     return {
