@@ -3,6 +3,7 @@ from .pet import Pet, LostPet, AdoptionPet, AdoptionPetViews
 from .lost_pet_report import LostPetReport
 from .notification import Notification
 from .adoption import Adoption
+from .vaccination import VaccinationRecord
 
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "AdoptionPet",
     "AdoptionPetViews",
     "Adoption",
+    "VaccinationRecord",
 ]
