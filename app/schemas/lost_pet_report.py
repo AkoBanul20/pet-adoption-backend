@@ -76,6 +76,7 @@ class LostPetReportDetailsResponse(BaseModel):
     report_location: str
     report_date: datetime
     image_url: str
+    is_matched: Optional[bool] = None
     created_at: datetime
     updated_at: datetime
     deleted_at: Optional[datetime] = None
@@ -83,3 +84,7 @@ class LostPetReportDetailsResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class LostPetReportMatchUpdate(BaseModel):
+    is_matched: bool
