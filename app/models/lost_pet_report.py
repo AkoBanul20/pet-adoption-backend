@@ -6,6 +6,7 @@ from sqlalchemy import (
     func, 
     Text, 
     ForeignKey,
+    Boolean
 )
 
 from sqlalchemy.orm import relationship
@@ -23,6 +24,7 @@ class LostPetReport(Base):
     report_location = Column(String(255), nullable=False)
     report_date = Column(DateTime, nullable=False, server_default=func.now(), index=True)
     image_url = Column(String(255), nullable=True, default=None)
+    is_matched = Column(Boolean, index=True, nullable=True)
     created_at = Column(DateTime, server_default=func.now(), index=True)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), index=True)
     deleted_at = Column(DateTime, nullable=True, index=True)
