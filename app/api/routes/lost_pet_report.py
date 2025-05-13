@@ -15,11 +15,13 @@ from app.crud.lost_pet_report import (
     create_lost_pet_report,
     get_lost_pet_reports,
     get_lost_pet_report_by_id,
+    update_lost_pet_report_match,
 )
 from app.schemas.lost_pet_report import (
     LostPetReport,
     LostPetReportCreate,
     LostPetReportDetailsResponse,
+    LostPetReportMatchUpdate
 )
 
 from app.models.user import User
@@ -166,3 +168,29 @@ def read_lost_pet_report_route(
         raise HTTPException(status_code=404, detail="Lost pet report not found")
 
     return lost_pet_report
+
+
+@router.patch(
+    "/{report_id}/match",
+    response_model=LostPetReportDetailsResponse,
+    summary="Update lost pet report match status"
+)
+def update_report_match(
+    report_id: int,
+    match_update: LostPetReportMatchUpdate,
+    db: Session = Depends(get_db),
+    # current_user: User = Depends(get_current_active_user)
+):
+    """
+    Update the match status of a lost pet report.
+    Only authenticated users can update the match status.
+    
+    Parameters:
+    - **report_id**: ID of the lost pet report
+    - **is_matched**: Boolean indicating if the pet has been matched/found
+    """
+    return update_lost_pet_report_match(
+        db=db,
+        report_id=report_id,
+        match_update=match_update
+    )
