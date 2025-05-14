@@ -27,3 +27,8 @@ class User(Base):
 
     pets = relationship("Pet", back_populates="owner", cascade="all, delete-orphan")
     lost_pet_reports = relationship("LostPetReport", back_populates="reporter")
+    transfer_coordinations = relationship(
+        "TransferCoordination", 
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
