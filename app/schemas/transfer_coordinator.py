@@ -37,3 +37,17 @@ class TransferCoordinationInDB(TransferCoordinationInDBBase):
 class TransferCoordinationListResponse(BaseModel):
     items: List[TransferCoordinationResponse]
     total: int
+
+class TransferCoordinationStatusUpdate(BaseModel):
+    status: str = Field(
+        ..., 
+        description="Status of the transfer coordination request"
+    )
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "status": "ACCEPTED"
+            }
+        }

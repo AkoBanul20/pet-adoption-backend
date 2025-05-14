@@ -6,7 +6,7 @@ from fastapi import HTTPException, status
 
 from app.models.transfer_coordinator import TransferCoordination, PetType
 from app.models.user import User
-from app.schemas.transfer_coordinator import TransferCoordinationCreate, TransferCoordinationUpdate
+from app.schemas.transfer_coordinator import TransferCoordinationCreate, TransferCoordinationUpdate, TransferCoordinationStatusUpdate, TransferCoordinationInDB
 
 def create_transfer_coordination(
     db: Session,
@@ -152,6 +152,54 @@ def delete_transfer_coordination(
         db.commit()
         
         return {"message": "Transfer coordination request deleted successfully"}
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database error: {str(e)}"
+        )
+    
+
+def update_transfer_coordination_status(
+    db: Session,
+    transfer_id: int,
+    status_update: TransferCoordinationStatusUpdate,
+    # current_user: User,
+) -> TransferCoordination:
+    """Update the status of a transfer coordination request"""
+    try:
+        transfer = db.query(TransferCoordination).filter(
+            TransferCoordination.id == transfer_id,
+            TransferCoordination.deleted_at.is_(None)
+        ).first()
+
+        if not transfer:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Transfer coordination with ID {transfer_id} not found"
+            )
+
+        # # Check if user is authorized (owner or admin)
+        # if transfer.user_id != current_user.id and not current_user.is_superuser:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_403_FORBIDDEN,
+        #         detail="Not authorized to update this transfer coordination status"
+        #     )
+
+        # Validate status value
+        valid_statuses = ["PENDING", "APPROVED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]
+        if status_update.status not in valid_statuses:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+            )
+
+        transfer.status = status_update.status
+        db.commit()
+        db.refresh(transfer)
+
+        return TransferCoordinationInDB.model_validate(transfer)
 
     except SQLAlchemyError as e:
         db.rollback()
