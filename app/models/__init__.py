@@ -4,6 +4,7 @@ from .lost_pet_report import LostPetReport
 from .notification import Notification
 from .adoption import Adoption
 from .vaccination import VaccinationRecord
+from .transfer_coordinator import TransferCoordination
 
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "AdoptionPetViews",
     "Adoption",
     "VaccinationRecord",
+    "TransferCoordination",
 ]
