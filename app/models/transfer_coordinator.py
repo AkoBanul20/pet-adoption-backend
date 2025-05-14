@@ -22,7 +22,7 @@ class TransferCoordination(Base):
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    deleted_at = Column(DateTime, nullable=True, onupdate=func.now())
+    deleted_at = Column(DateTime, nullable=True, index=True)
     
 
     # Relationships
