@@ -1,3 +1,5 @@
+import json
+import logging
 from fastapi import APIRouter, Depends, Query, status
 from typing import Optional
 from sqlalchemy.orm import Session
@@ -10,17 +12,22 @@ from app.schemas.transfer_coordinator import (
     TransferCoordinationCreate,
     TransferCoordinationUpdate,
     TransferCoordinationResponse,
-    TransferCoordinationListResponse
+    TransferCoordinationListResponse,
+    TransferCoordinationStatusUpdate
 )
 from app.crud.transfer_coordinator import (
     create_transfer_coordination,
     get_transfer_coordinations,
     get_transfer_coordination,
     update_transfer_coordination,
-    delete_transfer_coordination
+    delete_transfer_coordination,
+    update_transfer_coordination_status,
 )
+from app.utils.redis import RedisHelper
+
 
 router = APIRouter()
+redis = RedisHelper()
 
 @router.post(
     "/transfer-coordinations",
@@ -134,3 +141,58 @@ def delete_transfer(
         transfer_id=transfer_id,
         # current_user=current_user
     )
+
+
+@router.patch(
+    "/transfer-coordinations/{transfer_id}/status",
+    response_model=TransferCoordinationResponse,
+    summary="Update transfer coordination status"
+)
+def update_transfer_status(
+    transfer_id: int,
+    status_update: TransferCoordinationStatusUpdate,
+    db: Session = Depends(get_db),
+    # current_user: User = Depends(get_current_active_user)
+):
+    """
+    Update the status of a transfer coordination request.
+    
+    Available statuses:
+    - PENDING
+    - ACCEPTED
+    - IN_PROGRESS
+    - COMPLETED
+    - CANCELLED
+    
+    Only the owner or admin can update the status.
+    """
+
+    transfer = update_transfer_coordination_status(
+        db=db,
+        transfer_id=transfer_id,
+        status_update=status_update,
+        # current_user=current_user
+    )
+
+    #add redis data
+    formatted_schedule = transfer.request_datetime.strftime("%B %d %Y, %I:%M %p") if transfer.request_datetime else None
+    redis_data = {
+        "queue_type": "transfer_notification",
+        "email": transfer.user.email,
+        "name": transfer.user.full_name,
+        "request_data": {
+            "barangay_name": transfer.barangay_name,
+            "address": transfer.address,
+            "pet_type": transfer.pet_type.value,
+            "requested_date": formatted_schedule,
+        },
+    }
+
+    transaction_queue= redis.add_to_redis_set("qc_pet_adoption:notifications", json.dumps(redis_data))
+
+
+    if not transaction_queue:
+        logging.warning(f"Failed to store in the queue {transfer.id}")
+    # print(redis_data)
+     
+    return transfer
